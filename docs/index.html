@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人主页</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        
+        body { background-color: var(--bg-color); color: var(--text-dark); line-height: 1.6; }
+        
+        /* 容器 */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+        /* 头部 */
+        header { text-align: center; padding: 60px 0; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--text-dark); }
+        .bio { color: var(--text-light); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+        
+        /* 社交链接 */
+        .social-links { margin-top: 20px; }
+        .social-links a { margin: 0 10px; text-decoration: none; color: var(--primary-color); font-weight: bold; }
+        .social-links a:hover { text-decoration: underline; }
+
+        /* 通用板块样式 */
+        section { background: var(--card-bg); padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h2 { font-size: 1.5rem; margin-bottom: 20px; border-bottom: 2px solid var(--bg-color); padding-bottom: 10px; }
+
+        /* 技能标签 */
+        .skills { display: flex; flex-wrap: wrap; gap: 10px; }
+        .skill-tag { background: #e0e7ff; color: var(--primary-color); padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; font-weight: 500; }
+
+        /* 项目列表 */
+        .project-item { margin-bottom: 20px; }
+        .project-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; display: block; }
+        .project-desc { color: var(--text-light); font-size: 0.95rem; margin-bottom: 8px; }
+        .project-link { color: var(--primary-color); text-decoration: none; font-size: 0.9rem; }
+        .project-link:hover { text-decoration: underline; }
+
+        /* 页脚 */
+        footer { text-align: center; padding: 40px 0; color: var(--text-light); font-size: 0.9rem; }
+
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .container { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 头部信息 -->
+        <header>
+            <!-- 请替换下面的 src 为你的头像图片链接 -->
+            <!--img src="https://imgur.com/a/CLVsseg" alt="头像" class="avatar"-->
+            <h1>hi，I am Zixuan</h1>
+            <p class="bio">Automobile Product Owner | Personal Bloger <br>热衷于探索技术与生活的边界，喜欢分享有价值的知识。</p>
+            
+            <div class="social-links">
+                <a href="#">GitHub</a>
+                <a href="#">Twitter/X</a>
+                <a href="#">LinkedIn</a>
+                <a href="mailto:example@email.com">Email Me</a>
+            </div>
+        </header>
+
+        <!-- 关于我 -->
+        <section>
+            <h2>关于我</h2>
+            <p>这里可以写一段详细的自我介绍。比如你目前的职业状态，你过去做过什么有趣的项目，或者你对未来的规划。保持真诚和简洁是最好的策略。</p>
+        </section>
+
+        <!-- 技能栈 -->
+        <section>
+            <h2>技能专长</h2>
+            <div class="skills">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">数据分析</span>
+                <span class="skill-tag">内容写作</span>
+                <span class="skill-tag">项目管理</span>
+                <span class="skill-tag">AI 应用</span>
+            </div>
+        </section>
+
+        <!-- 项目经历 -->
+        <section>
+            <h2>精选项目</h2>
+            
+            <div class="project-item">
+                <a href="#" class="project-title">🚀 个人博客系统搭建</a>
+                <p class="project-desc">使用 Hugo 和 GitHub Pages 搭建的静态博客，实现了自动化部署和自定义主题，月访问量突破 1000+。</p>
+                <a href="#" class="project-link">查看详情 →</a>
+            </div>
+
+            <div class="project-item">
+                <a href="#" class="project-title">📊 电商数据可视化大屏</a>
+                <p class="project-desc">基于 Python Pandas 和 ECharts 开发的数据分析看板，帮助团队提升了 20% 的决策效率。</p>
+                <a href="#" class="project-link">查看详情 →</a>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer>
+            <p>&copy; 2026 我的个人主页。Built with ❤️ by AI.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
