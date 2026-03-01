@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人主页</title>
+    <title>My Profile</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -68,7 +68,7 @@
             
             <div class="social-links">
                 <a href="https://xhslink.com/m/6uDLkaadVm5">Redbook</a>
-                <a href="#">LinkedIn</a>
+                <a href="www.linkedin.com/in/zixuan-wang-b6777b193">LinkedIn</a>
                 <a href="https://www.instagram.com/wang_zixuan_1996/">Instagram</a>
                 <!--a href="wzx13223052@163.com.com">Email Me</a-->
             </div>
@@ -76,16 +76,16 @@
 
         <!-- 关于我 -->
         <section>
-            <h2>关于我</h2>
-            <p>🚗 BMW China Navigation Product Owner <br> 🎓 Graduate from RWTH Automotive Engineering <br> 😀 Plan on crosscultral business</p>
+            <h2>My Life</h2>
+            <p>🚗 BMW China Navigation Product Owner <br> 🎓 Masterdegree from RWTH Automotive Engineering <br> 😀 Plan on crosscultral business</p>
         </section>
 
         <!-- 技能栈 -->
         <section>
-            <h2>Passion</h2>
+            <h2>My Passion</h2>
             <div class="skills">
                 <span class="skill-tag">Car drifting</span>
-                <span class="skill-tag">Carting</span>
+                <span class="skill-tag">Karting</span>
                 <span class="skill-tag">Swimming</span>
                 <span class="skill-tag">Paddle</span>
                 <span class="skill-tag">Cycling</span>
@@ -93,28 +93,68 @@
             </div>
         </section>
 
-        <!-- 项目经历 -->
-        <section>
-            <h2>精选项目</h2>
-            
-            <div class="project-item">
-                <a href="#" class="project-title">🚀 个人博客系统搭建</a>
-                <p class="project-desc">使用 Hugo 和 GitHub Pages 搭建的静态博客，实现了自动化部署和自定义主题，月访问量突破 1000+。</p>
-                <a href="#" class="project-link">查看详情 →</a>
-            </div>
 
-            <div class="project-item">
-                <a href="#" class="project-title">📊 电商数据可视化大屏</a>
-                <p class="project-desc">基于 Python Pandas 和 ECharts 开发的数据分析看板，帮助团队提升了 20% 的决策效率。</p>
-                <a href="#" class="project-link">查看详情 →</a>
-            </div>
-        </section>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenStreetMap + Leaflet 示例</title>
+    
+    <!-- 1. 引入 Leaflet 的 CSS 文件 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+     
+    <style>
+        /* 2. 设置地图容器的高度，必须设置高度否则地图不显示 */
+        #map { height: 500px; width: 100%; }
+        body { margin: 0; padding: 0; font-family: sans-serif; }
+    </style>
+</head>
+<body>
 
+    <h2>My Journey</h2>
+    <!-- 3. 地图容器 div -->
+    <div id="map"></div>
+
+    <!-- 4. 引入 Leaflet 的 JS 文件 (放在 CSS 之后) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+    <script>
+        // 5. 初始化地图
+        // setView([纬度, 经度], 缩放级别)
+        var map = L.map('map').setView([1.2557430744008429, 103.81450908057327], 2);
+        
+        // 6. 添加 OpenStreetMap 的瓦片图层 (Tile Layer)
+        // 这里的 URL 是 OSM 的标准图层地址，{z}/{x}/{y} 是动态替换的占位符
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // 7. 添加一个标记 (Marker), 给标记添加弹窗 (Popup)
+        var marker = L.marker([1.2536952320853711, 103.81516358308578]).addTo(map);
+        marker.bindPopup("<b>2026</b><br>Singapore").openPopup();
+        var marker = L.marker([50.77718849207857, 6.077141974579101]).addTo(map);
+        marker.bindPopup("<b>2017</b><br>Germany").openPopup();
+        var marker = L.marker([31.192128338345434, 121.59736869124022]).addTo(map);
+        marker.bindPopup("<b>2021</b><br>Shanghai").openPopup();
+
+        // 9. 添加点击事件：点击地图任意位置显示坐标
+        var popup = L.popup();
+        function onMapClick(e) {
+            popup
+                .setLatLng(e.latlng)
+                .setContent("you click" + e.latlng.toString())
+                .openOn(map);
+        }
+        map.on('click', onMapClick);
+    </script>
+</body>
         <!-- 页脚 -->
         <footer>
-            <p>&copy; 2026 我的个人主页。Built with ❤️ by AI.</p>
+            <p>&copy; my personal profile, Built with Qwen❤️.</p>
         </footer>
     </div>
-
-</body>
 </html>
