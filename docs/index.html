@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile</title>
+    <title>我的个人主页</title>
     <style>
         :root {
             --primary-color: #345499;
             --text-dark: #1f2937;
             --text-light: #9376a6;
-            --bg-color: #f8f2fc;
+            --bg-color: #dfd5e6;
             --card-bg: #ffffff;
         }
 
@@ -17,13 +17,13 @@
         
         body { background-color: var(--bg-color); color: var(--text-dark); line-height: 1.6; }
         
-        /* Container */
+        /* 容器 */
         .container { max-width: 800px; margin: 0 auto; padding: 20px; }
 
-        /* Head */
+        /* 头部 */
         header { text-align: center; padding: 60px 0; }
         .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--text-light); }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--text-dark); }
         .bio { color: var(--text-light); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
         
         /* 社交链接 */
@@ -63,12 +63,12 @@
         <header>
             <!-- 请替换下面的 src 为你的头像图片链接 -->
             <img src="avatar.jpg" alt="头像" class="avatar">
-            <h1>hi，Nice to meet you</h1>
+            <h1>hi，Ms Wang</h1>
             <p class="bio">Automobile Industry | Lifelong Explorer <br>My ten years with car 2017~2026 <br>Passionate about learning and self improvement, INFJ</p>
             
             <div class="social-links">
                 <a href="https://xhslink.com/m/6uDLkaadVm5">Redbook</a>
-                <a href="https://www.linkedin.com/in/zixuan-wang-b6777b193/">LinkedIn</a>
+                <a href="www.linkedin.com/in/zixuan-wang-b6777b193">LinkedIn</a>
                 <a href="https://www.instagram.com/wang_zixuan_1996/">Instagram</a>
                 <!--a href="wzx13223052@163.com.com">Email Me</a-->
             </div>
@@ -80,13 +80,7 @@
             <p>🚗 BMW China Navigation Product Owner <br> 🎓 Masterdegree from RWTH Automotive Engineering <br> 😀 Plan on crosscultral business</p>
         </section>
 
-        <!-- 语言 -->
-        <section>
-            <h2>My Language</h2>
-            <p>live on Chinese<br>work in English<br>grow with German</p>
-        </section>
-
-        <!-- 爱好 -->
+        <!-- 技能栈 -->
         <section>
             <h2>My Passion</h2>
             <div class="skills">
@@ -101,62 +95,200 @@
 
 
 <head>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenStreetMap + Leaflet 示例</title>
+    <title>OpenStreetMap + 3D 悬浮锥形扎点</title>
     
-    <!-- 1. 引入 Leaflet 的 CSS 文件 -->
+    <!-- 引入 Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
      crossorigin=""/>
      
     <style>
-        /* 2. 设置地图容器的高度，必须设置高度否则地图不显示 */
-        #map { height: 500px; width: 100%; }
-        body { margin: 0; padding: 0; font-family: sans-serif; }
+        #map { height: 600px; width: 100%; }
+        body { margin: 0; padding: 20px; font-family: sans-serif; background: #f4f4f4; }
+        h2 { text-align: center; color: #333; }
+
+        /* === 3D 锥形扎点 CSS 开始 === */
+        .cone-pin-container {
+            position: relative;
+            width: 50px;
+            /* 这里的总高度要包含：锥体高度 + 预留的悬浮空间 */
+            height: 100px; 
+            pointer-events: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        /* 锥体主体 */
+        .cone-body {
+            width: 50px;
+            height: 60px;
+            background: linear-gradient(to right, 
+                rgba(255,255,255,0.6) 0%, 
+                #2196F3 40%, 
+                #0D47A1 100%);
+            
+            /* 尖端朝下 */
+            clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+            
+            position: absolute;
+            bottom: 10px; /* 基础位置 */
+            left: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2;
+            filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.2));
+        }
+
+        /* 地面投影 (关键：这里通过 JS 动态调整 bottom 来抵消悬浮) */
+        .pin-shadow {
+            width: 40px;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            position: absolute;
+            /* 初始位置设为 0，具体偏移量由 JS 控制以匹配悬浮高度 */
+            bottom: 0px; 
+            left: 5px;
+            filter: blur(5px);
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        /* 悬停动画：进一步向上浮起 */
+        .cone-pin-container:hover .cone-body {
+            /* 在原有悬浮基础上再往上一点 */
+            transform: translateY(-20px) scale(1.05);
+            background: linear-gradient(to right, 
+                rgba(255,255,255,0.8) 0%, 
+                #42A5F5 40%, 
+                #1565C0 100%);
+        }
+
+        .cone-pin-container:hover .pin-shadow {
+            /* 悬停时，影子变淡变小，模拟距离变远 */
+            opacity: 0.2;
+            transform: scale(0.8);
+            /* 注意：这里不需要改变 bottom，因为 shadow 是参考容器的，
+               但为了视觉效果，我们可以让它稍微再往下挪一点点或者保持不动 */
+        }
+        /* === 3D 锥形扎点 CSS 结束 === */
     </style>
 </head>
 <body>
 
-    <h2>My Journey</h2>
-    <!-- 3. 地图容器 div -->
+    <h2>我的 OpenStreetMap 地图 (真实悬浮效果)</h2>
     <div id="map"></div>
 
-    <!-- 4. 引入 Leaflet 的 JS 文件 (放在 CSS 之后) -->
+    <!-- 引入 Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
 
     <script>
-        // 5. 初始化地图
-        // setView([纬度, 经度], 缩放级别)
-        var map = L.map('map').setView([1.2557430744008429, 103.81450908057327], 2);
+        // 1. 初始化地图
+        var map = L.map('map').setView([1.3670549676806412, 103.9891971414403], 2);
         
-        // 6. 添加 OpenStreetMap 的瓦片图层 (Tile Layer)
-        // 这里的 URL 是 OSM 的标准图层地址，{z}/{x}/{y} 是动态替换的占位符
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        // 2. 添加底图
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(map);
 
-        // 7. 添加一个标记 (Marker), 给标记添加弹窗 (Popup)
-        var marker = L.marker([1.2536952320853711, 103.81516358308578]).addTo(map);
-        marker.bindPopup("<b>2026</b><br>Singapore").openPopup();
-        var marker = L.marker([50.77718849207857, 6.077141974579101]).addTo(map);
-        marker.bindPopup("<b>2017</b><br>Germany").openPopup();
-        var marker = L.marker([31.192128338345434, 121.59736869124022]).addTo(map);
-        marker.bindPopup("<b>2021</b><br>Shanghai").openPopup();
+        // ==========================================
+        // 3. 配置参数
+        // ==========================================
+        var coneHeight = 60;       // 锥体本身的高度
+        var floatHeight = 20;      // 【想要悬浮的高度】(锥体尖端离地面的距离)
+        var totalIconHeight = coneHeight + floatHeight + 10; // 图标容器总高 (留点余量)
 
-        // 9. 添加点击事件：点击地图任意位置显示坐标
+        // ==========================================
+        // 4. 构建 HTML (动态注入悬浮偏移量)
+        // ==========================================
+        // 技巧：为了让影子留在地面，我们需要把影子在容器内“向下推” floatHeight 的距离
+        // 这样当整个容器被 iconAnchor 顶起来 floatHeight 时，影子正好回到地面坐标点
+        
+        var coneHtml = `
+            <div class="cone-pin-container" style="height: ${totalIconHeight}px;">
+                <!-- 影子：bottom 设为负值，抵消容器的上移 -->
+                <div class="pin-shadow" style="bottom: ${-floatHeight}px;"></div>
+                
+                <!-- 锥体：正常放置在容器底部附近 -->
+                <div class="cone-body" style="
+                    clip-path: polygon(50% 100%, 0% 0%, 100% 0%); 
+                    bottom: ${floatHeight + 5}px; /* 锥体也要相应抬高，留出影子空间 */
+                    height: ${coneHeight}px;
+                "></div>
+            </div>
+        `;
+
+        // ==========================================
+        // 5. 创建图标对象
+        // ==========================================
+        var finalConeIcon = L.divIcon({
+            className: 'dummy',
+            html: coneHtml,
+            iconSize: [50, totalIconHeight],
+            
+            // 【核心逻辑】
+            // 我们希望地图坐标点 (LatLng) 落在影子的中心（即地面）
+            // 影子在容器内的位置是：bottom: -floatHeight
+            // 容器总高：totalIconHeight
+            // 影子中心的 Y 坐标 ≈ totalIconHeight - (shadowHeight/2) + floatHeight
+            // 简化理解：我们要让坐标点对准“原本应该是地面”的那个点。
+            // 在我们的布局里，锥体尖端原本在 bottom: 5px 处。
+            // 现在我们要让整个结构上浮，使得尖端离地 floatHeight。
+            // 所以锚点应该设在：锥体尖端位置 + floatHeight
+            
+            // 锥体尖端在容器内的 Y 坐标 = totalIconHeight - (bottom偏移) 
+            // 这里简单点：直接设锚点为 [25, totalIconHeight - 5] (假设尖端接近底部)
+            // 但为了精准：
+            // 我们的目标是：坐标点 = 地面。
+            // 当前 DOM 结构中，影子已经被我们手动向下移了 floatHeight。
+            // 所以影子的视觉中心现在位于容器的最底部附近。
+            // 我们将锚点设在容器的最底部 (totalIconHeight)，坐标点就会对准影子（地面）。
+            // 此时，锥体因为被抬高了 floatHeight，自然就浮起来了。
+            
+            iconAnchor: [25, totalIconHeight - 2], // 锚点设在容器最底部（影子所在处）
+            popupAnchor: [0, -(floatHeight + 60)]  // 弹窗从锥体顶部弹出
+        });
+
+        // 6. 添加扎点
+        var pinLocation = [1.3670549676806412, 103.9891971414403];
+        
+        L.marker(pinLocation, { icon: finalConeIcon })
+            .addTo(map)
+            .bindTooltip(`<b>📍 新加坡`);
+
+        var pinLocation = [50.77718849207857, 6.077141974579101];
+        
+        L.marker(pinLocation, { icon: finalConeIcon })
+            .addTo(map)
+            .bindTooltip(`<b>📍 德国`);
+
+        var pinLocation = [31.192128338345434, 121.59736869124022];
+
+        L.marker(pinLocation, { icon: finalConeIcon })
+            .addTo(map)
+            .bindTooltip(`<b>📍上海`);
+
+        // 7. 点击事件
         var popup = L.popup();
         function onMapClick(e) {
             popup
                 .setLatLng(e.latlng)
-                .setContent("you click" + e.latlng.toString())
+                .setContent("你点击了坐标: " + e.latlng.toString())
                 .openOn(map);
         }
         map.on('click', onMapClick);
     </script>
+</body>
+</html>
 </body>
         <!-- 页脚 -->
         <footer>
