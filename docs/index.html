@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人主页</title>
+    <title>My Personal Page - Ms Wang</title>
     <style>
         :root {
             --primary-color: #345499;
@@ -11,288 +11,293 @@
             --text-light: #9376a6;
             --bg-color: #dfd5e6;
             --card-bg: #ffffff;
+            --accent-color: #ff6b6b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         
-        body { background-color: var(--bg-color); color: var(--text-dark); line-height: 1.6; }
+        body { background-color: var(--bg-color); color: var(--text-dark); line-height: 1.6; padding: 20px; }
         
-        /* 容器 */
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-
-        /* 头部 */
-        header { text-align: center; padding: 60px 0; }
-        .avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--text-dark); }
-        .bio { color: var(--text-light); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+        /* === Timer & Settings Panel Styles === */
+        .timer-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .timer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .timer-title { font-size: 1rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
         
-        /* 社交链接 */
-        .social-links { margin-top: 20px; }
-        .social-links a { margin: 0 10px; text-decoration: none; color: var(--primary-color); font-weight: bold; }
-        .social-links a:hover { text-decoration: underline; }
+        .timer-display { font-size: 3rem; font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; margin: 10px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .timer-status { text-align: center; font-size: 0.9rem; opacity: 0.9; margin-bottom: 20px; }
 
-        /* 通用板块样式 */
-        section { background: var(--card-bg); padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        h2 { font-size: 1.5rem; margin-bottom: 20px; border-bottom: 2px solid var(--bg-color); padding-bottom: 10px; }
+        /* Settings Form Area */
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+        }
+        .form-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 100px; display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.75rem; margin-bottom: 4px; opacity: 0.8; font-weight: 600; }
+        
+        .form-input {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            color: #333;
+            width: 100%;
+            font-weight: bold;
+        }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+        .btn-save { background: #4ade80; color: #064e3b; }
+        .btn-save:hover { background: #22c55e; transform: translateY(-1px); }
+        
+        .btn-perm { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); }
+        .btn-perm:hover { background: rgba(255,255,255,0.3); }
 
-        /* 技能标签 */
-        .skills { display: flex; flex-wrap: wrap; gap: 10px; }
-        .skill-tag { background: #e0e7ff; color: var(--primary-color); padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; font-weight: 500; }
-
-        /* 项目列表 */
-        .project-item { margin-bottom: 20px; }
-        .project-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; display: block; }
-        .project-desc { color: var(--text-light); font-size: 0.95rem; margin-bottom: 8px; }
-        .project-link { color: var(--primary-color); text-decoration: none; font-size: 0.9rem; }
-        .project-link:hover { text-decoration: underline; }
-
-        /* 页脚 */
-        footer { text-align: center; padding: 40px 0; color: var(--text-light); font-size: 0.9rem; }
-
-        /* 移动端适配 */
+        /* Responsive */
         @media (max-width: 600px) {
-            h1 { font-size: 2rem; }
-            .container { padding: 15px; }
+            .timer-display { font-size: 2.2rem; }
+            .form-row { flex-direction: column; }
+            .form-group { min-width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- 头部信息 -->
-        <header>
-            <!-- 请替换下面的 src 为你的头像图片链接 -->
-            <img src="avatar.jpg" alt="头像" class="avatar">
-            <h1>hi，Ms Wang</h1>
-            <p class="bio">Automobile Industry | Lifelong Explorer <br>My ten years with car 2017~2026 <br>Passionate about learning and self improvement, INFJ</p>
-            
-            <div class="social-links">
-                <a href="https://xhslink.com/m/6uDLkaadVm5">Redbook</a>
-                <a href="www.linkedin.com/in/zixuan-wang-b6777b193">LinkedIn</a>
-                <a href="https://www.instagram.com/wang_zixuan_1996/">Instagram</a>
-                <!--a href="wzx13223052@163.com.com">Email Me</a-->
+    <!-- === Countdown & Settings Panel === -->
+    <div id="notification-timer" class="timer-box">
+        <div class="timer-header">
+            <span class="timer-title">⏰ DW German Learning Reminder</span>
+        </div>
+        
+        <div class="timer-display" id="countdown">--:--:--</div>
+        <div class="timer-status" id="timer-status">Initializing...</div>
+
+        <!-- Settings Form (Time Only) -->
+        <div class="settings-panel">
+            <div style="margin-bottom: 10px; font-size: 0.85rem; opacity: 0.9;">
+                Set your daily reminder time:
             </div>
-        </header>
-
-        <!-- 关于我 -->
-        <section>
-            <h2>My Life</h2>
-            <p>🚗 BMW China Navigation Product Owner <br> 🎓 Masterdegree from RWTH Automotive Engineering <br> 😀 Plan on crosscultral business</p>
-        </section>
-
-        <!-- 技能栈 -->
-        <section>
-            <h2>My Passion</h2>
-            <div class="skills">
-                <span class="skill-tag">Car drifting</span>
-                <span class="skill-tag">Karting</span>
-                <span class="skill-tag">Swimming</span>
-                <span class="skill-tag">Paddle</span>
-                <span class="skill-tag">Cycling</span>
-                <span class="skill-tag">Tennis</span>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Hour (0-23)</label>
+                    <input type="number" id="input-hour" class="form-input" min="0" max="23" placeholder="HH">
+                </div>
+                <div class="form-group">
+                    <label>Minute (0-59)</label>
+                    <input type="number" id="input-minute" class="form-input" min="0" max="59" placeholder="MM">
+                </div>
             </div>
-        </section>
 
+            <div class="btn-group">
+                <button class="btn btn-save" onclick="saveSettings()">💾 Save & Reset Timer</button>
+                <button class="btn btn-perm" onclick="requestNotificationPermission()">🔔 Enable Notifications</button>
+            </div>
+        </div>
+    </div>
 
-<head>
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenStreetMap + 3D 悬浮锥形扎点</title>
-    
-    <!-- 引入 Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-     
-    <style>
-        #map { height: 600px; width: 100%; }
-        body { margin: 0; padding: 20px; font-family: sans-serif; background: #f4f4f4; }
-        h2 { text-align: center; color: #333; }
-
-        /* === 3D 锥形扎点 CSS 开始 === */
-        .cone-pin-container {
-            position: relative;
-            width: 50px;
-            /* 这里的总高度要包含：锥体高度 + 预留的悬浮空间 */
-            height: 100px; 
-            pointer-events: auto;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-        }
-
-        /* 锥体主体 */
-        .cone-body {
-            width: 50px;
-            height: 60px;
-            background: linear-gradient(to right, 
-                rgba(255,255,255,0.6) 0%, 
-                #2196F3 40%, 
-                #0D47A1 100%);
-            
-            /* 尖端朝下 */
-            clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-            
-            position: absolute;
-            bottom: 10px; /* 基础位置 */
-            left: 0;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 2;
-            filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.2));
-        }
-
-        /* 地面投影 (关键：这里通过 JS 动态调整 bottom 来抵消悬浮) */
-        .pin-shadow {
-            width: 40px;
-            height: 10px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 50%;
-            position: absolute;
-            /* 初始位置设为 0，具体偏移量由 JS 控制以匹配悬浮高度 */
-            bottom: 0px; 
-            left: 5px;
-            filter: blur(5px);
-            z-index: 1;
-            transition: all 0.3s ease;
-        }
-
-        /* 悬停动画：进一步向上浮起 */
-        .cone-pin-container:hover .cone-body {
-            /* 在原有悬浮基础上再往上一点 */
-            transform: translateY(-20px) scale(1.05);
-            background: linear-gradient(to right, 
-                rgba(255,255,255,0.8) 0%, 
-                #42A5F5 40%, 
-                #1565C0 100%);
-        }
-
-        .cone-pin-container:hover .pin-shadow {
-            /* 悬停时，影子变淡变小，模拟距离变远 */
-            opacity: 0.2;
-            transform: scale(0.8);
-            /* 注意：这里不需要改变 bottom，因为 shadow 是参考容器的，
-               但为了视觉效果，我们可以让它稍微再往下挪一点点或者保持不动 */
-        }
-        /* === 3D 锥形扎点 CSS 结束 === */
-    </style>
-</head>
-<body>
-
-    <h2>我的 OpenStreetMap 地图 (真实悬浮效果)</h2>
-    <div id="map"></div>
-
-    <!-- 引入 Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
+    <!-- 引入 Leaflet (保持原有地图功能，如果需要) -->
+    <!-- 如果不需要地图，可以删除下面两行 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
     <script>
-        // 1. 初始化地图
-        var map = L.map('map').setView([1.3670549676806412, 103.9891971414403], 2);
+        // ==========================================
+        // 1. Configuration (Fixed Content)
+        // ==========================================
         
-        // 2. 添加底图
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            subdomains: 'abcd',
-            maxZoom: 20
-        }).addTo(map);
+        // 🛑 MODIFY THESE VALUES TO CHANGE THE FIXED MESSAGE
+        const FIXED_CONFIG = {
+            title: "⏰ Time for DW German",
+            body: "Keep learning! https://learngerman.dw.com/de/deutsch-lernen/s-9095"
+        };
 
-        // ==========================================
-        // 3. 配置参数
-        // ==========================================
-        var coneHeight = 60;       // 锥体本身的高度
-        var floatHeight = 20;      // 【想要悬浮的高度】(锥体尖端离地面的距离)
-        var totalIconHeight = coneHeight + floatHeight + 10; // 图标容器总高 (留点余量)
-
-        // ==========================================
-        // 4. 构建 HTML (动态注入悬浮偏移量)
-        // ==========================================
-        // 技巧：为了让影子留在地面，我们需要把影子在容器内“向下推” floatHeight 的距离
-        // 这样当整个容器被 iconAnchor 顶起来 floatHeight 时，影子正好回到地面坐标点
+        let nextTargetTime = null;
+        let timerInterval = null;
         
-        var coneHtml = `
-            <div class="cone-pin-container" style="height: ${totalIconHeight}px;">
-                <!-- 影子：bottom 设为负值，抵消容器的上移 -->
-                <div class="pin-shadow" style="bottom: ${-floatHeight}px;"></div>
-                
-                <!-- 锥体：正常放置在容器底部附近 -->
-                <div class="cone-body" style="
-                    clip-path: polygon(50% 100%, 0% 0%, 100% 0%); 
-                    bottom: ${floatHeight + 5}px; /* 锥体也要相应抬高，留出影子空间 */
-                    height: ${coneHeight}px;
-                "></div>
-            </div>
-        `;
+        // Default time settings (if no local storage)
+        const defaultTimeConfig = {
+            hour: 19,
+            minute: 46
+        };
+
+        // Current active configuration
+        let currentTimeConfig = { ...defaultTimeConfig };
 
         // ==========================================
-        // 5. 创建图标对象
+        // 2. Local Storage Management
         // ==========================================
-        var finalConeIcon = L.divIcon({
-            className: 'dummy',
-            html: coneHtml,
-            iconSize: [50, totalIconHeight],
+        function loadSettings() {
+            const saved = localStorage.getItem('wangReminderTimeOnly');
+            if (saved) {
+                try {
+                    currentTimeConfig = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Failed to load settings", e);
+                    currentTimeConfig = { ...defaultTimeConfig };
+                }
+            } else {
+                // First visit: Set to 2 minutes from now for easy testing
+                const now = new Date();
+                currentTimeConfig.hour = now.getHours();
+                currentTimeConfig.minute = now.getMinutes() + 2;
+                if (currentTimeConfig.minute >= 60) {
+                    currentTimeConfig.hour = (currentTimeConfig.hour + 1) % 24;
+                    currentTimeConfig.minute = 0;
+                }
+            }
+            updateInputFields();
+        }
+
+        function saveSettings() {
+            const h = parseInt(document.getElementById('input-hour').value);
+            const m = parseInt(document.getElementById('input-minute').value);
+
+            if (isNaN(h) || h < 0 || h > 23) { 
+                alert("Please enter a valid hour (0-23)"); 
+                return; 
+            }
+            if (isNaN(m) || m < 0 || m > 59) { 
+                alert("Please enter a valid minute (0-59)"); 
+                return; 
+            }
+
+            // Save only time, content is fixed
+            currentTimeConfig = { hour: h, minute: m };
+            localStorage.setItem('wangReminderTimeOnly', JSON.stringify(currentTimeConfig));
             
-            // 【核心逻辑】
-            // 我们希望地图坐标点 (LatLng) 落在影子的中心（即地面）
-            // 影子在容器内的位置是：bottom: -floatHeight
-            // 容器总高：totalIconHeight
-            // 影子中心的 Y 坐标 ≈ totalIconHeight - (shadowHeight/2) + floatHeight
-            // 简化理解：我们要让坐标点对准“原本应该是地面”的那个点。
-            // 在我们的布局里，锥体尖端原本在 bottom: 5px 处。
-            // 现在我们要让整个结构上浮，使得尖端离地 floatHeight。
-            // 所以锚点应该设在：锥体尖端位置 + floatHeight
+            // Reset timer immediately
+            nextTargetTime = calculateNextTarget();
+            updateCountdown();
             
-            // 锥体尖端在容器内的 Y 坐标 = totalIconHeight - (bottom偏移) 
-            // 这里简单点：直接设锚点为 [25, totalIconHeight - 5] (假设尖端接近底部)
-            // 但为了精准：
-            // 我们的目标是：坐标点 = 地面。
-            // 当前 DOM 结构中，影子已经被我们手动向下移了 floatHeight。
-            // 所以影子的视觉中心现在位于容器的最底部附近。
-            // 我们将锚点设在容器的最底部 (totalIconHeight)，坐标点就会对准影子（地面）。
-            // 此时，锥体因为被抬高了 floatHeight，自然就浮起来了。
+            alert("✅ Settings Saved! Countdown updated.");
+        }
+
+        function updateInputFields() {
+            document.getElementById('input-hour').value = currentTimeConfig.hour;
+            document.getElementById('input-minute').value = currentTimeConfig.minute;
+        }
+
+        // ==========================================
+        // 3. Countdown Logic
+        // ==========================================
+        
+        function calculateNextTarget() {
+            const now = new Date();
+            const target = new Date();
             
-            iconAnchor: [25, totalIconHeight - 2], // 锚点设在容器最底部（影子所在处）
-            popupAnchor: [0, -(floatHeight + 60)]  // 弹窗从锥体顶部弹出
+            target.setHours(currentTimeConfig.hour, currentTimeConfig.minute, 0, 0);
+
+            // If today's time has passed, set target to tomorrow
+            if (now >= target) {
+                target.setDate(target.getDate() + 1);
+            }
+            return target;
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            if (!nextTargetTime) nextTargetTime = calculateNextTarget();
+            
+            const diff = nextTargetTime - now;
+
+            if (diff <= 0) {
+                sendNotification();
+                nextTargetTime = calculateNextTarget();
+                return; 
+            }
+
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            const hStr = hours.toString().padStart(2, '0');
+            const mStr = minutes.toString().padStart(2, '0');
+            const sStr = seconds.toString().padStart(2, '0');
+
+            document.getElementById('countdown').textContent = `${hStr}:${mStr}:${sStr}`;
+            
+            const dateStr = nextTargetTime.toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short' });
+            const timeStr = nextTargetTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('timer-status').textContent = `Next reminder: ${dateStr} at ${timeStr}`;
+        }
+
+        function startTimer() {
+            updateCountdown();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateCountdown, 1000);
+        }
+
+        // ==========================================
+        // 4. Notification System
+        // ==========================================
+        
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("Sorry, your browser does not support desktop notifications.");
+                return;
+            }
+
+            if (Notification.permission === "granted") {
+                new Notification("Test Successful", { body: "Notifications are ready!" });
+                alert("Notifications enabled!");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        new Notification("Welcome", { body: "Notifications are ready!" });
+                        alert("Thanks for enabling notifications!");
+                    } else {
+                        alert("Permission denied. Please click the icon in the address bar to allow notifications.");
+                    }
+                });
+            } else {
+                alert("Notifications are blocked. Please enable them in your browser settings.");
+            }
+        }
+
+        function sendNotification() {
+            if (Notification.permission === "granted") {
+                new Notification(FIXED_CONFIG.title, {
+                    body: FIXED_CONFIG.body,
+                    icon: "avatar.jpg", 
+                    badge: "avatar.jpg",
+                    requireInteraction: false
+                });
+            } else {
+                alert(FIXED_CONFIG.title + "\n" + FIXED_CONFIG.body);
+            }
+            
+            nextTargetTime = calculateNextTarget();
+        }
+
+        // ==========================================
+        // 5. Initialization
+        // ==========================================
+        window.addEventListener('load', () => {
+            loadSettings();
+            startTimer();
         });
 
-        // 6. 添加扎点
-        var pinLocation = [1.3670549676806412, 103.9891971414403];
-        
-        L.marker(pinLocation, { icon: finalConeIcon })
-            .addTo(map)
-            .bindTooltip(`<b>📍 新加坡`);
-
-        var pinLocation = [50.77718849207857, 6.077141974579101];
-        
-        L.marker(pinLocation, { icon: finalConeIcon })
-            .addTo(map)
-            .bindTooltip(`<b>📍 德国`);
-
-        var pinLocation = [31.192128338345434, 121.59736869124022];
-
-        L.marker(pinLocation, { icon: finalConeIcon })
-            .addTo(map)
-            .bindTooltip(`<b>📍上海`);
-
-        // 7. 点击事件
-        var popup = L.popup();
-        function onMapClick(e) {
-            popup
-                .setLatLng(e.latlng)
-                .setContent("你点击了坐标: " + e.latlng.toString())
-                .openOn(map);
-        }
-        map.on('click', onMapClick);
     </script>
 </body>
-</html>
-</body>
-        <!-- 页脚 -->
-        <footer>
-            <p>&copy; my personal profile, Built with Qwen❤️.</p>
-        </footer>
-    </div>
 </html>
