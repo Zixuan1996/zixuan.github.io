@@ -1,0 +1,320 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>3D地图 - 不等宽表格</title>
+<style>
+    html, body { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: sans-serif; }
+    #container { width: 100%; height: 100%; }
+</style>
+<!-- 引入高德地图 JS API -->
+<script src="https://webapi.amap.com/maps?v=2.0&key=91157c95849c86777e157ddd6612a3bb&plugin=AMap.ControlBar,AMap.ToolBar"></script>
+</head>
+<body>
+<div id="container"></div>
+
+<script>
+var map;
+var linkZones = []; // 存储链接点击区域
+
+function mapInit(){
+  // 1. 初始化地图
+  map = new AMap.Map('container', {
+    rotateEnable: true,
+    pitchEnable: true,
+    pitch: 50,
+    rotation: -15, 
+    viewMode: '3D',
+    zooms: [2, 20],
+    mapStyle: "amap://styles/light",
+    center: [116.412757,39.890495]
+  });
+  
+  // 添加控件
+  var controlBar = new AMap.ControlBar({ position: { right: '10px', top: '10px' }, showZoomBar: false });
+  controlBar.addTo(map);
+  var toolBar = new AMap.ToolBar({ position: { right: '10px', top: '80px' } });
+  toolBar.addTo(map);
+
+  // 2. 原始数据 (保持不变)
+  var shopData = [
+    { id: 1, name: "德南面包房 (白鹿司北店)", lng: 116.559225, lat: 39.873475 },
+    { id: 2, name: "德南面包房 (双井店)", lng: 116.450754, lat: 39.897165 },
+    { id: 3, name: "德南面包房 (苏州街店)", lng: 116.306411, lat: 39.978442 },
+    { id: 4, name: "德南面包房 (首钢园融石广场店)", lng: 116.162042, lat: 39.919078 },
+    { id: 5, name: "德南面包房 (大钟寺抖音总部店)", lng: 116.344094, lat: 39.966740 }
+  ];
+
+  // 3. 原始 Marker 逻辑 (保持不变)
+  var markers = []; 
+  shopData.forEach(function(item, index) {
+    var marker = new AMap.Marker({
+      position: [item.lng, item.lat],
+      icon: new AMap.Icon({
+        image: 'https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png', 
+        size: new AMap.Size(30, 40),
+        anchor: 'bottom-center',
+        imageSize: new AMap.Size(30, 40)
+      }),
+      offset: new AMap.Pixel(-15, -40),
+      label: {
+        content: `<div style="background:#fff; padding:2px 5px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.3); font-size:12px; color:#333; white-space:nowrap;">${item.name}</div>`,
+        direction: 'top',
+        offset: new AMap.Pixel(0, -10),
+        zoomable: true
+      }
+    });
+
+    marker.on('click', function(e) {
+      var infoWindow = new AMap.InfoWindow({
+        content: `<div><strong>${item.name}</strong></div><div>ID: ${item.id}</div>`,
+        offset: new AMap.Pixel(0, -10)
+      });
+      infoWindow.open(map, e.lnglat);
+    });
+    markers.push(marker);
+  });
+
+  map.add(markers);
+  map.setFitView(markers, true, [60, 60, 60, 60]);
+
+  // ==========================================
+  // 4. 【核心配置】支持独立列宽
+  // ==========================================
+  
+  var tableDataConfig = {
+      x: 20,            
+      y: 100,           
+      rowHeight: 35,    
+      
+      colWidths: [140, 80, 350], 
+      
+      headerColor: '#4a90e2', 
+      rowColorOdd: '#ffffff', 
+      rowColorEven: '#f2f2f2',
+      borderColor: '#cccccc', 
+      textColor: '#333333',   
+      fontSize: 12,
+      linkColIndex: 2, // 第3列是链接 从0开始)
+
+      header: ["课程名称", "时间", "操作"],
+
+      rows: [
+          ["DW德语入门", "16:30", "https://learngerman.dw.com/de/deutsch-lernen/s-9095"],
+          ["edx数据分析", "18:00", "https://home.edx.org/"],
+          ["Coursera机器学习", "20:00", "https://www.coursera.org/"]
+      ]
+  };
+
+  // 计算动态尺寸
+  var totalCols = tableDataConfig.colWidths.length;
+  var totalRows = tableDataConfig.rows.length + 1; 
+  
+  // 计算总宽度：累加所有列宽
+  var totalWidth = 0;
+  for(var i=0; i<totalCols; i++) {
+      totalWidth += tableDataConfig.colWidths[i];
+  }
+  
+  var totalHeight = tableDataConfig.rowHeight * totalRows;
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  var canvas = document.createElementNS(svgNS, 'svg');
+  canvas.setAttribute('width', '100%'); 
+  canvas.setAttribute('height', '100%');
+  canvas.style.pointerEvents = 'auto'; 
+  canvas.style.filter = 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))';
+
+  var group = document.createElementNS(svgNS, 'g');
+  canvas.appendChild(group);
+
+  var customLayer = new AMap.CustomLayer(canvas, {
+      zIndex: 300,
+      alwaysRender: false 
+  });
+
+  function onRender() {
+      linkZones = []; 
+      while (group.firstChild) {
+          group.removeChild(group.firstChild);
+      }
+
+      var currentSize = map.getSize();
+      canvas.setAttribute('width', currentSize.width);
+      canvas.setAttribute('height', currentSize.height);
+
+      // 1. 绘制外框
+      var rectBg = document.createElementNS(svgNS, 'rect');
+      rectBg.setAttribute('x', tableDataConfig.x);
+      rectBg.setAttribute('y', tableDataConfig.y);
+      rectBg.setAttribute('width', totalWidth);
+      rectBg.setAttribute('height', totalHeight);
+      rectBg.setAttribute('fill', '#ffffff');
+      rectBg.setAttribute('stroke', tableDataConfig.borderColor);
+      rectBg.setAttribute('stroke-width', 1);
+      rectBg.style.pointerEvents = 'none'; 
+      group.appendChild(rectBg);
+
+      // 2. 绘制行背景和横线
+      for (var r = 0; r < totalRows; r++) {
+          var yPos = tableDataConfig.y + (r * tableDataConfig.rowHeight);
+          
+          var rectRow = document.createElementNS(svgNS, 'rect');
+          rectRow.setAttribute('x', tableDataConfig.x);
+          rectRow.setAttribute('y', yPos);
+          rectRow.setAttribute('width', totalWidth);
+          rectRow.setAttribute('height', tableDataConfig.rowHeight);
+          
+          if (r === 0) {
+              rectRow.setAttribute('fill', tableDataConfig.headerColor);
+          } else {
+              rectRow.setAttribute('fill', ((r - 1) % 2 === 0) ? tableDataConfig.rowColorOdd : tableDataConfig.rowColorEven);
+          }
+          rectRow.style.pointerEvents = 'none';
+          group.appendChild(rectRow);
+
+          if (r < totalRows - 1) {
+              var lineY = yPos + tableDataConfig.rowHeight;
+              var line = document.createElementNS(svgNS, 'line');
+              line.setAttribute('x1', tableDataConfig.x);
+              line.setAttribute('y1', lineY);
+              line.setAttribute('x2', tableDataConfig.x + totalWidth);
+              line.setAttribute('y2', lineY);
+              line.setAttribute('stroke', tableDataConfig.borderColor);
+              line.setAttribute('stroke-width', 1);
+              line.style.pointerEvents = 'none';
+              group.appendChild(line);
+          }
+      }
+
+      // 3. 绘制列竖线 (根据累加宽度定位)
+      var currentX = tableDataConfig.x;
+      for (var c = 0; c < totalCols; c++) {
+          currentX += tableDataConfig.colWidths[c]; // 移动到下一列的起始位置
+          
+          // 如果不是最后一列右边框（外框已画），则画中间的分隔线
+          if (c < totalCols - 1) {
+              var line = document.createElementNS(svgNS, 'line');
+              line.setAttribute('x1', currentX);
+              line.setAttribute('y1', tableDataConfig.y);
+              line.setAttribute('x2', currentX);
+              line.setAttribute('y2', tableDataConfig.y + totalHeight);
+              line.setAttribute('stroke', tableDataConfig.borderColor);
+              line.setAttribute('stroke-width', 1);
+              line.style.pointerEvents = 'none';
+              group.appendChild(line);
+          }
+      }
+
+      // 4. 绘制文字
+      // 辅助函数：获取某列的起始X坐标
+      function getColumnX(colIndex) {
+          var x = tableDataConfig.x;
+          for(var i=0; i<colIndex; i++) {
+              x += tableDataConfig.colWidths[i];
+          }
+          return x;
+      }
+
+      // 4.1 表头
+      tableDataConfig.header.forEach(function(text, colIndex) {
+          var xPos = getColumnX(colIndex) + 5;
+          var yPos = tableDataConfig.y + 22;
+          createText(group, text, xPos, yPos, 'bold', '#ffffff');
+      });
+
+      // 4.2 数据行
+      tableDataConfig.rows.forEach(function(rowData, rowIndex) {
+          var rowYBase = tableDataConfig.y + ((rowIndex + 1) * tableDataConfig.rowHeight);
+          var yPos = rowYBase + 22;
+          
+          rowData.forEach(function(cellText, colIndex) {
+              if (colIndex >= totalCols) return;
+
+              var xPos = getColumnX(colIndex) + 5;
+              var colW = tableDataConfig.colWidths[colIndex];
+              
+              var textColor = tableDataConfig.textColor;
+              var fontWeight = 'normal';
+              var textDecoration = 'none';
+              var displayText = cellText;
+
+              // 处理链接列样式
+              if (colIndex === tableDataConfig.linkColIndex) {
+                  textColor = '#0066cc';
+                  textDecoration = 'underline';
+                  fontWeight = 'bold';
+
+                  // 记录点击热区
+                  linkZones.push({
+                      x: getColumnX(colIndex),
+                      y: rowYBase,
+                      width: colW,
+                      height: tableDataConfig.rowHeight,
+                      url: cellText
+                  });
+              } else {
+                  // 非链接列：如果文字太长，根据当前列宽简单截断 (估算：12px字体约6px宽)
+                  var maxChars = Math.floor((colW - 10) / 7); 
+                  if (displayText.length > maxChars) {
+                      displayText = displayText.substring(0, maxChars - 2) + '..';
+                  }
+              }
+
+              createText(group, displayText, xPos, yPos, fontWeight, textColor, textDecoration);
+          });
+      });
+  }
+
+  function createText(parentGroup, textContent, x, y, weight, color, decoration) {
+      var text = document.createElementNS(svgNS, 'text');
+      text.setAttribute('x', x);
+      text.setAttribute('y', y);
+      text.setAttribute('fill', color);
+      text.setAttribute('font-size', tableDataConfig.fontSize);
+      text.setAttribute('font-weight', weight);
+      if (decoration) text.setAttribute('text-decoration', decoration);
+      text.setAttribute('font-family', 'Arial, sans-serif');
+      text.textContent = textContent;
+      text.style.pointerEvents = 'none';
+      parentGroup.appendChild(text);
+  }
+
+  // 点击事件处理
+  canvas.addEventListener('click', function(e) {
+      var rect = canvas.getBoundingClientRect();
+      var clickX = e.clientX - rect.left;
+      var clickY = e.clientY - rect.top;
+
+      var clickedLink = null;
+
+      for (var i = 0; i < linkZones.length; i++) {
+          var zone = linkZones[i];
+          if (clickX >= zone.x && clickX <= zone.x + zone.width &&
+              clickY >= zone.y && clickY <= zone.y + zone.height) {
+              clickedLink = zone.url;
+              break;
+          }
+      }
+
+      if (clickedLink) {
+          e.stopPropagation(); 
+          window.open(clickedLink, '_blank');
+      } else {
+          e.stopPropagation();
+      }
+  });
+
+  customLayer.render = onRender;
+  customLayer.setMap(map);
+  
+  onRender();
+
+  window.addEventListener('resize', onRender);
+}
+
+window.onload = mapInit;
+</script>
+</body>
+</html>
