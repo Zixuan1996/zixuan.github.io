@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新加坡美食地图</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+     
+    <style>
+        #map { height: 800px; width: 100%; }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        h2 { text-align: left; color: #333; margin: 10px 0 10px 0; }
+
+        /* --- 容器样式 --- */
+       .minimal-label {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important; /* 关键：消除所有外边距 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            z-index: 1000 !important;
+            line-height: 1; /* 防止行高导致额外空间 */
+        }
+
+        /* --- 文字卡片样式 (增强对比度) --- */
+        .label-card {
+            background-color: #ffffff;
+            border: 1px solid #333333;
+            /* 关键：使用极大半径实现完美椭圆/胶囊形 */
+            border-radius: 9999px; 
+            padding: 5px 14px; /* 上下内边距稍小，左右稍大，保持椭圆比例 */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: left;
+            position: relative;
+            z-index: 2;
+            margin: 0 !important; /* 关键：再次确保无 margin */
+            white-space: nowrap;
+            display: inline-block; /* 确保宽度自适应内容 */
+        }
+
+        /* 新增：地标特有的卡片微调 (可选，为了区分，不改动核心结构) */
+        .label-card.landmark-style {
+            background-color: #e8f4fd;
+            border-radius: 0px;
+            border-color: #b3d9ff;
+            text-align: center;
+        }
+
+        .m-title {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+
+        .m-desc {
+            display: block;
+            font-weight: 500;
+            font-size: 11px;
+            color: #5e5d5a; /* 保持你设定的紫色描述 */
+            white-space: nowrap;
+        }
+
+        /* --- SVG 容器 --- */
+        .connector-svg {
+            display: block;
+            overflow: visible;
+        }
+        
+        .leaflet-tooltip.minimal-label:before {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📍 新加坡美食地图</h2>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+    <script>
+        var map = L.map('map').setView([1.29791019869214, 103.84521628783327], 14.4);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        var finalConeIcon = L.icon({
+            iconUrl: 'pin.png', 
+            iconSize: [25, 25],       
+            iconAnchor: [12, 24],     
+            popupAnchor: [0, -24]
+        });
+
+        var landmarkIcon = L.divIcon({
+            className: 'custom-landmark-div', // 使用上面定义的 CSS 类
+            html: '🏛️', // 使用 Emoji 作为图标内容
+            iconSize: [25, 25],
+            iconAnchor: [14, 28],
+            popupAnchor: [0, -28]
+        });
+
+        const locations = [
+            { lat: 1.29791019869214, lng: 103.84521628783327, title: "Estuary", desc: "西班牙菜", color: "#a979ec" }, 
+            { lat: 1.296941137108915, lng: 103.82713079503436, title: "Killiney", desc: "叻沙", color: "#457B9D" },            
+            { lat: 1.298850379935745, lng: 103.86078340146616, title: "Canton Paradise", desc: "港式茶餐厅", color: "#1D3557" },
+            { lat: 1.2798007913826843, lng: 103.84333180044518, title: "Yakun Kaya", desc: "亚坤", color: "#E63946" },            
+            { lat: 1.2831832846199889, lng: 103.85876946821163, title: "Marina Bay", desc: "美食广场", color: "#457B9D" },
+            { lat: 1.2886320403494267, lng: 103.84462433948194, title: "Toast Box", desc: "连锁早餐", color: "#FCA311" },
+            { lat: 1.311294306895484, lng: 103.85570141140312, title: "Annapoorna", desc: "印度菜", color: "#5e5d5a"},
+           
+        ];
+
+        const landmarks = [
+            { lat: 1.298850379935745, lng: 103.84808045939957, title: "新加坡博物馆" },
+            { lat: 1.290249703950553, lng: 103.86324231470729, title: "摩天轮" },
+            { lat: 1.2815368556834563, lng: 103.84483111140206, title: "牛车水" },
+            { lat: 1.2818583288189003, lng: 103.86373929765125, title: "滨海湾花园" },
+
+        ];
+
+        locations.forEach(function(loc) {
+            var marker = L.marker([loc.lat, loc.lng], {
+                icon: finalConeIcon 
+            }).addTo(map);
+
+
+            // --- 参数配置 ---
+            const lineHeight = 30; // 线的长度
+            const strokeWidth = 1;
+            
+            // --- SVG 路径 (垂直向下) ---
+            // M 0,0 -> 从标签底部中心开始
+            // V 25  -> 垂直向下画 25px
+            const svgPath = `M 0,0 V ${lineHeight} H+30`;
+
+            const tooltipContent = `
+                <div class="minimal-label">
+                    <!-- 文字卡片 -->
+                    <div class="label-card">
+                        <span class="m-title" style="color: ${loc.color}">${loc.title}</span>
+                        <span class="m-desc">${loc.desc}</span>
+                    </div>
+                    
+                    <!-- SVG 连线部分 (放在文字下方) -->
+                    <svg class="connector-svg" width="2" height="${lineHeight}">
+                        <path d="${svgPath}" 
+                              fill="none" 
+                              stroke="#a979ec" 
+                              stroke-width="${strokeWidth}" 
+                              stroke-dasharray="4,2" />
+                    </svg>
+                </div>
+            `;
+
+            marker.bindTooltip(tooltipContent, {
+                permanent: true,
+                direction: 'top',       // 标签在上方
+                className: 'minimal-label',
+                offset: [-40, 0]        // 向上微调，让线的末端刚好接触图标顶部
+            });
+        });
+
+        landmarks.forEach(function(lm) {
+            var marker = L.marker([lm.lat, lm.lng], {
+                icon: landmarkIcon 
+            }).addTo(map);
+
+            // 地标不需要 SVG 连线，直接构建只有文字卡片的 HTML
+            const tooltipContent = `
+                <div class="minimal-label">
+                    <!-- 文字卡片 (无下方 SVG) -->
+                    <div class="label-card landmark-style">
+                        <span class="m-title" style="color: #4a90e2">${lm.title}</span>
+                    </div>
+                </div>
+            `;
+            marker.bindTooltip(tooltipContent, {
+                permanent: true,
+                direction: 'right',       
+                className: 'minimal-label',
+                // 因为没有线了，offset 的 Y 轴可以稍微调整，让卡片底部更贴近图标顶部
+                offset: [0, -5]        
+            });
+        });
+
+    </script>
+</body>
+</html>
